@@ -1,0 +1,515 @@
+<Window x:Class="SubtitleMatcher.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="视频字幕自动匹配工具" Height="600" Width="1000"
+        Icon="SubtitleMatcher.ico"
+        WindowStartupLocation="CenterScreen"
+        Background="#F5F5F5"
+        FontFamily="Microsoft YaHei UI, Segoe UI Emoji, Segoe UI"
+        FontSize="14">
+
+    <Window.Resources>
+
+        <Style x:Key="ModernButton" TargetType="Button">
+            <Setter Property="Background" Value="#2196F3"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="12,6"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                CornerRadius="4"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#1976D2"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Background" Value="#0D47A1"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="UltraCompactTextBox" TargetType="TextBox">
+            <Setter Property="BorderBrush" Value="#E0E0E0"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="6,2"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="3"
+                                Padding="{TemplateBinding Padding}">
+                            <Grid>
+                                <ScrollViewer x:Name="PART_ContentHost" VerticalAlignment="Center"/>
+                                <TextBlock x:Name="Watermark" Text="{TemplateBinding Tag}" 
+                                           Foreground="#9E9E9E" 
+                                           IsHitTestVisible="False" 
+                                           VerticalAlignment="Center"
+                                           Visibility="Collapsed"/>
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsFocused" Value="True">
+                                <Setter Property="BorderBrush" Value="#2196F3"/>
+                                <Setter Property="BorderThickness" Value="2"/>
+                            </Trigger>
+                            <Trigger Property="Text" Value="">
+                                <Setter TargetName="Watermark" Property="Visibility" Value="Visible"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="UltraCompactCard" TargetType="Border">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="Padding" Value="6"/>
+            <Setter Property="Margin" Value="0,0,0,4"/>
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect ShadowDepth="1" BlurRadius="4" Opacity="0.05"/>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="SmallCard" TargetType="Border">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="Padding" Value="8"/>
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect ShadowDepth="1" BlurRadius="4" Opacity="0.05"/>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="TabButtonSelected" TargetType="Button">
+            <Setter Property="Background" Value="#2196F3"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="18,5"/>
+            <Setter Property="FontFamily" Value="Microsoft YaHei UI, Segoe UI Emoji, Segoe UI"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                CornerRadius="4,4,0,0"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="TabButtonUnselected" TargetType="Button">
+            <Setter Property="Background" Value="#E8EAF6"/>
+            <Setter Property="Foreground" Value="#616161"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="18,5"/>
+            <Setter Property="FontFamily" Value="Microsoft YaHei UI, Segoe UI Emoji, Segoe UI"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                CornerRadius="4,4,0,0"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#C5CAE9"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="OperationButtonSelected" TargetType="Button">
+            <Setter Property="Background" Value="#2196F3"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="12,4"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                CornerRadius="3"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="OperationButtonUnselected" TargetType="Button">
+            <Setter Property="Background" Value="#E0E0E0"/>
+            <Setter Property="Foreground" Value="#616161"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="12,4"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                CornerRadius="3"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#BDBDBD"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="CenterCell" TargetType="TextBlock">
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="Padding" Value="4,0"/>
+        </Style>
+
+        <Style x:Key="LeftCell" TargetType="TextBlock">
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Padding" Value="4,0"/>
+        </Style>
+
+        <Style x:Key="CenterHeader" TargetType="DataGridColumnHeader">
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+
+        <!-- 自动匹配行样式 -->
+        <Style x:Key="AutoMatchRowStyle" TargetType="DataGridRow">
+            <Setter Property="Background" Value="White"/>
+        </Style>
+
+        <!-- 手动匹配行样式 -->
+        <Style x:Key="ManualMatchRowStyle" TargetType="DataGridRow">
+            <Setter Property="Background" Value="White"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- 顶部操作按钮（Viewbox 自适应缩放） -->
+        <Border Grid.Row="0" Style="{StaticResource SmallCard}" Margin="0,0,0,4">
+            <Viewbox Stretch="Uniform" StretchDirection="Both" HorizontalAlignment="Center" MaxHeight="56">
+                <StackPanel Orientation="Horizontal">
+
+                    <!-- 操作模式 -->
+                    <Border Background="#F5F5F5" CornerRadius="4" Padding="6,3" Margin="0,0,8,0">
+                        <StackPanel Orientation="Horizontal">
+                            <Button x:Name="CopyButton" Content="📋 复制字幕"
+                                    Click="SelectCopy_Click" Margin="0,0,6,0"
+                                    ToolTip="将字幕文件复制到视频所在目录，原字幕保留在原位置不动"/>
+                            <Button x:Name="MoveButton" Content="📦 移动字幕"
+                                    Click="SelectMove_Click" Margin="0,0,6,0"
+                                    ToolTip="将字幕文件移动到视频所在目录，原位置不再保留该文件"/>
+                            <Button x:Name="RenameButton" Content="✏️ 重命名"
+                                    Click="SelectRename_Click"
+                                    ToolTip="复制字幕到视频目录并重命名为视频文件名（保留扩展名），方便播放器自动加载"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- 扫描·执行·撤销·翻译 -->
+                    <Border Background="#F5F5F5" CornerRadius="4" Padding="6,3" Margin="0,0,8,0">
+                        <StackPanel Orientation="Horizontal">
+                            <Button x:Name="ScanButton" Content="🔍 扫描" Style="{StaticResource ModernButton}"
+                                   Click="Scan_Click" Margin="0,0,5,0" FontSize="11"
+                                   ToolTip="扫描视频和字幕文件夹，自动提取剧名·季数·集数并尝试自动匹配"/>
+                            <Button x:Name="MatchButton" Content="▶️ 执行" Style="{StaticResource ModernButton}"
+                                   Click="Match_Click" Margin="0,0,5,0" FontSize="11"
+                                   Background="#4CAF50"
+                                   ToolTip="对已勾选的项目执行当前选中的操作（复制/移动/重命名），目标文件已存在会直接覆盖"/>
+                            <Button x:Name="UndoButton" Content="↩️ 撤销" Style="{StaticResource ModernButton}"
+                                   Click="Undo_Click" Margin="0,0,5,0" FontSize="11"
+                                   Background="#FF9800"
+                                   ToolTip="撤销本次运行期间最近一次执行的文件操作（关闭软件后无法撤销）"/>
+                            <Button x:Name="TranslateToggleButton" Content="🌐 翻译关" Style="{StaticResource ModernButton}"
+                                   Click="ToggleOnlineTranslation_Click" Margin="0,0,5,0" FontSize="11"
+                                   Background="#E0E0E0" Foreground="#616161"
+                                   ToolTip="开启后可将非英文剧名翻译成英文再匹配，提高跨语言匹配率"/>
+                            <Button x:Name="ConfigButton" Content="⚙️ 配置" Style="{StaticResource ModernButton}"
+                                   Click="TranslateConfig_Click" FontSize="11"
+                                   Background="#78909C" Foreground="White"
+                                   ToolTip="配置翻译服务的服务器地址，支持自定义 API 或恢复默认"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- 说明许可 -->
+                    <Border Background="#F5F5F5" CornerRadius="4" Padding="6,3">
+                        <StackPanel Orientation="Horizontal">
+                            <Button x:Name="HelpButton" Content="📖 说明" Style="{StaticResource ModernButton}"
+                                   Click="Help_Click" Margin="0,0,8,0" FontSize="11"
+                                   Background="#9C27B0"
+                                   ToolTip="打开使用说明窗口，查看完整的格式说明·使用步骤·常见问题"/>
+                            <Button x:Name="AboutButton" Content="ℹ️ 许可" Style="{StaticResource ModernButton}"
+                                   Click="About_Click" FontSize="11"
+                                   Background="#607D8B"
+                                   ToolTip="打开许可协议窗口，查看软件版权信息和授权使用条例"/>
+                        </StackPanel>
+                    </Border>
+
+                </StackPanel>
+            </Viewbox>
+        </Border>
+
+        <!-- 视频文件夹区域 -->
+        <Border Grid.Row="1" Style="{StaticResource UltraCompactCard}" Margin="0,0,0,4">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,4,0">
+                    <TextBlock Text="📁" FontSize="11" VerticalAlignment="Center"/>
+                    <TextBlock Text="视频" FontSize="11" VerticalAlignment="Center" Margin="2,0,0,0"/>
+                </StackPanel>
+                <TextBox Grid.Column="1" x:Name="VideoPathTextBox" Style="{StaticResource UltraCompactTextBox}"
+                        VerticalContentAlignment="Center" Margin="0,0,6,0"
+                        Tag="视频文件夹路径"/>
+                <Button Grid.Column="2" Content="浏览" Style="{StaticResource ModernButton}"
+                       Click="BrowseVideo_Click" Width="60" FontSize="11"
+                       ToolTip="选择视频文件夹，支持递归扫描所有子文件夹"/>
+            </Grid>
+        </Border>
+
+        <!-- 字幕文件夹区域 -->
+        <Border Grid.Row="2" Style="{StaticResource UltraCompactCard}" Margin="0,0,0,4">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,4,0">
+                    <TextBlock Text="📄" FontSize="11" VerticalAlignment="Center"/>
+                    <TextBlock Text="字幕" FontSize="11" VerticalAlignment="Center" Margin="2,0,0,0"/>
+                </StackPanel>
+                <TextBox Grid.Column="1" x:Name="SubtitlePathTextBox" Style="{StaticResource UltraCompactTextBox}"
+                        VerticalContentAlignment="Center" Margin="0,0,6,0"
+                        Tag="字幕文件夹路径"/>
+                <Button Grid.Column="2" Content="浏览" Style="{StaticResource ModernButton}"
+                       Click="BrowseSubtitle_Click" Width="60" FontSize="11"
+                       ToolTip="选择字幕文件夹，支持递归扫描所有子文件夹"/>
+            </Grid>
+        </Border>
+
+        <!-- 匹配区域 -->
+        <Border Grid.Row="3" Style="{StaticResource UltraCompactCard}" Padding="0">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!-- 标签切换 + 状态显示 -->
+                <Grid Grid.Row="0" Margin="6,4,6,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" Orientation="Horizontal">
+                        <Button x:Name="AutoTabButton" Content="⚡ 自动匹配"
+                                Click="SwitchToAuto_Click" Margin="0,0,3,0"
+                                ToolTip="切换到自动匹配模式，根据剧名·季数·集数自动匹配视频和字幕"/>
+                        <Button x:Name="ManualTabButton" Content="🔧 手动匹配"
+                                Click="SwitchToManual_Click"
+                                ToolTip="切换到手动匹配模式，可通过下拉列表或浏览按钮手动选择字幕"/>
+                    </StackPanel>
+                    <TextBlock x:Name="StatusTextBlock" Grid.Column="1"
+                               Text="" FontSize="11" Foreground="#757575"
+                               VerticalAlignment="Center" HorizontalAlignment="Right"
+                               Margin="0,0,4,0"/>
+                </Grid>
+
+                <!-- 内容区域 -->
+                <Border Grid.Row="1" Background="#F5F5F5" Margin="3" CornerRadius="0,0,3,3">
+                    <Grid>
+                        <!-- 自动匹配表格（DataGrid 自行处理滚动，表头固定不动） -->
+                        <DataGrid x:Name="AutoMatchDataGrid" AutoGenerateColumns="False" IsReadOnly="False"
+                                 SelectionMode="Single" CanUserAddRows="False" CanUserDeleteRows="False"
+                                 GridLinesVisibility="Horizontal" HeadersVisibility="Column"
+                                 Background="White" BorderThickness="0"
+                                 RowHeight="32" ColumnHeaderHeight="32"
+                                 FontSize="11" CanUserResizeColumns="False"
+                                 ColumnHeaderStyle="{StaticResource CenterHeader}"
+                                 RowStyle="{StaticResource AutoMatchRowStyle}"
+                                 EnableRowVirtualization="True" EnableColumnVirtualization="True"
+                                 VirtualizingPanel.IsVirtualizing="True"
+                                 VirtualizingPanel.VirtualizationMode="Recycling"
+                                 ScrollViewer.CanContentScroll="True"
+                                 Visibility="Visible">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="#" Binding="{Binding RowNumber}" IsReadOnly="True" Width="Auto" MinWidth="32">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock" BasedOn="{StaticResource CenterCell}">
+                                            <Setter Property="Foreground" Value="#9E9E9E"/>
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+                                <DataGridTextColumn Header="📹 视频文件" Binding="{Binding VideoFile}" IsReadOnly="True" Width="Auto" MinWidth="80">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock" BasedOn="{StaticResource LeftCell}"/>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+                                <DataGridTextColumn Header="集数" Binding="{Binding VideoEpisode}" IsReadOnly="True" Width="Auto" MinWidth="36">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock" BasedOn="{StaticResource CenterCell}">
+                                            <Setter Property="FontWeight" Value="Bold"/>
+                                            <Setter Property="Foreground" Value="#1976D2"/>
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+                                <DataGridTextColumn Header="📜 匹配字幕" Binding="{Binding SubtitleDisplay}" IsReadOnly="True" Width="Auto" MinWidth="80">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock" BasedOn="{StaticResource LeftCell}"/>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+                                <DataGridTextColumn Header="集数" Binding="{Binding SubtitleEpisode}" IsReadOnly="True" Width="Auto" MinWidth="36">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock" BasedOn="{StaticResource CenterCell}">
+                                            <Setter Property="FontWeight" Value="Bold"/>
+                                            <Setter Property="Foreground" Value="#7B1FA2"/>
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+                                <DataGridCheckBoxColumn Header="✓" Binding="{Binding IsSelected, UpdateSourceTrigger=PropertyChanged}" Width="Auto" MinWidth="34">
+                                    <DataGridCheckBoxColumn.ElementStyle>
+                                        <Style TargetType="CheckBox">
+                                            <Setter Property="VerticalAlignment" Value="Center"/>
+                                            <Setter Property="HorizontalAlignment" Value="Center"/>
+                                        </Style>
+                                    </DataGridCheckBoxColumn.ElementStyle>
+                                </DataGridCheckBoxColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+
+                        <!-- 手动匹配表格 -->
+                        <DataGrid x:Name="ManualMatchDataGrid" AutoGenerateColumns="False" IsReadOnly="False"
+                                 SelectionMode="Single" CanUserAddRows="False" CanUserDeleteRows="False"
+                                 GridLinesVisibility="Horizontal" HeadersVisibility="Column"
+                                 Background="White" BorderThickness="0"
+                                 RowHeight="32" ColumnHeaderHeight="32"
+                                 FontSize="11" CanUserResizeColumns="False"
+                                 ColumnHeaderStyle="{StaticResource CenterHeader}"
+                                 RowStyle="{StaticResource ManualMatchRowStyle}"
+                                 EnableRowVirtualization="True" EnableColumnVirtualization="True"
+                                 VirtualizingPanel.IsVirtualizing="True"
+                                 VirtualizingPanel.VirtualizationMode="Recycling"
+                                 ScrollViewer.CanContentScroll="True"
+                                 Visibility="Collapsed">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="#" Binding="{Binding RowNumber}" IsReadOnly="True" Width="Auto" MinWidth="32">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock" BasedOn="{StaticResource CenterCell}">
+                                            <Setter Property="Foreground" Value="#9E9E9E"/>
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+                                <DataGridTextColumn Header="📹 视频文件" Binding="{Binding VideoFile}" IsReadOnly="True" Width="Auto" MinWidth="80">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock" BasedOn="{StaticResource LeftCell}"/>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+                                <DataGridTextColumn Header="集数" Binding="{Binding VideoEpisode}" IsReadOnly="True" Width="Auto" MinWidth="36">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock" BasedOn="{StaticResource CenterCell}">
+                                            <Setter Property="FontWeight" Value="Bold"/>
+                                            <Setter Property="Foreground" Value="#1976D2"/>
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+                                <DataGridTemplateColumn Header="📜 选择字幕" Width="Auto" MinWidth="80">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <ComboBox ItemsSource="{Binding AllSubtitles}"
+                                                     SelectedItem="{Binding SubtitleFile}"
+                                                     SelectionChanged="SubtitleComboBox_SelectionChanged"
+                                                     Margin="3" FontSize="10"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTextColumn Header="集数" Binding="{Binding SubtitleEpisode}" IsReadOnly="True" Width="Auto" MinWidth="36">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock" BasedOn="{StaticResource CenterCell}">
+                                            <Setter Property="FontWeight" Value="Bold"/>
+                                            <Setter Property="Foreground" Value="#7B1FA2"/>
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+                                <DataGridCheckBoxColumn Header="✓" Binding="{Binding IsSelected, UpdateSourceTrigger=PropertyChanged}" Width="Auto" MinWidth="34">
+                                    <DataGridCheckBoxColumn.ElementStyle>
+                                        <Style TargetType="CheckBox">
+                                            <Setter Property="VerticalAlignment" Value="Center"/>
+                                            <Setter Property="HorizontalAlignment" Value="Center"/>
+                                        </Style>
+                                    </DataGridCheckBoxColumn.ElementStyle>
+                                </DataGridCheckBoxColumn>
+                                <DataGridTemplateColumn Header="..." Width="44">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Button Content="..." Click="ManualSelect_Click" Tag="{Binding}"
+                                                   Background="#FF9800" Foreground="White"
+                                                   BorderThickness="0" Padding="4,2" Width="28"
+                                                   Cursor="Hand" FontSize="11" FontWeight="Bold"
+                                                   HorizontalAlignment="Center">
+                                                <Button.Template>
+                                                    <ControlTemplate TargetType="Button">
+                                                        <Border Background="{TemplateBinding Background}"
+                                                               CornerRadius="2">
+                                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                        </Border>
+                                                    </ControlTemplate>
+                                                </Button.Template>
+                                            </Button>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Grid>
+                </Border>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

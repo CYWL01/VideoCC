@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWPF>true</UseWPF>
+    <ApplicationIcon>SubtitleMatcher.ico</ApplicationIcon>
+    <AssemblyName>VideoSubtitleMatcher</AssemblyName>
+    <RootNamespace>SubtitleMatcher</RootNamespace>
+    <AssemblyTitle>Subtitle Matcher</AssemblyTitle>
+    <Product>Subtitle Matcher</Product>
+    <Description>Local video subtitle auto-matching, copying, moving and renaming tool</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Resource Include="SubtitleMatcher.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="README.md">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="LICENSE">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <Target Name="CopyChineseExe" AfterTargets="Build">
+    <Copy SourceFiles="$(TargetDir)VideoSubtitleMatcher.exe" DestinationFiles="$(TargetDir)视频字幕自动匹配工具.exe" SkipUnchangedFiles="true" />
+  </Target>
+
+</Project>
