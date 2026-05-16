@@ -1,2 +1,2 @@
-# SubtitleMatcher-
+# SubtitleMatcher-视频字幕自动匹配工具
 SubtitleMatcher视频字幕自动匹配工具
