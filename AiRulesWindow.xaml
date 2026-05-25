@@ -1,0 +1,80 @@
+<Window x:Class="SubtitleMatcher.AiRulesWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="AI 匹配规则" Height="900" Width="800"
+        WindowStartupLocation="CenterOwner"
+        Background="{StaticResource BgBrush}"
+        FontFamily="{StaticResource UiFont}">
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TabControl Grid.Row="0">
+            <TabItem Header="📖 规则说明">
+                <Border Background="{StaticResource CardBgBrush}" CornerRadius="8"
+                        Effect="{StaticResource CardShadow}" Padding="16">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto"
+                                  CanContentScroll="False" PanningMode="VerticalOnly">
+                        <RichTextBox x:Name="DocViewer"
+                                     IsReadOnly="True" BorderThickness="0"
+                                     Background="Transparent" IsDocumentEnabled="True"
+                                     FontFamily="{StaticResource UiFont}" Padding="0"/>
+                    </ScrollViewer>
+                </Border>
+            </TabItem>
+
+            <TabItem Header="✏️ 自定义提示词">
+                <Border Background="{StaticResource CardBgBrush}" CornerRadius="8"
+                        Effect="{StaticResource CardShadow}" Padding="16">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto"
+                                  CanContentScroll="False" PanningMode="VerticalOnly">
+                        <StackPanel>
+                            <TextBlock Text="系统提示词（System Prompt）" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                            <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="4" Margin="0,0,0,12">
+                                <TextBox x:Name="SystemPromptBox" FontSize="11" FontFamily="Consolas" Padding="8,4"
+                                         TextWrapping="Wrap" AcceptsReturn="True" MinHeight="60"
+                                         BorderThickness="0" Background="{StaticResource InputBgBrush}"/>
+                            </Border>
+
+                            <TextBlock Text="单条比对提示词（{nameA}、{nameB} 会被替换为实际名称）" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                            <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="4" Margin="0,0,0,12">
+                                <TextBox x:Name="SinglePromptBox" FontSize="11" FontFamily="Consolas" Padding="8,4"
+                                         TextWrapping="Wrap" AcceptsReturn="True" MinHeight="120"
+                                         BorderThickness="0" Background="{StaticResource InputBgBrush}"/>
+                            </Border>
+
+                            <TextBlock Text="批量匹配提示词（{videoList}、{subList} 会被替换为实际列表）" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                            <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="4" Margin="0,0,0,12">
+                                <TextBox x:Name="BatchPromptBox" FontSize="11" FontFamily="Consolas" Padding="8,4"
+                                         TextWrapping="Wrap" AcceptsReturn="True" MinHeight="120"
+                                         BorderThickness="0" Background="{StaticResource InputBgBrush}"/>
+                            </Border>
+
+                            <TextBlock x:Name="PromptStatus" FontSize="11" Foreground="{StaticResource SuccessTextBrush}" Margin="0,0,0,8"/>
+
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                <Button Content="🔄 重置为默认" Padding="12,6" FontSize="12" Margin="0,0,8,0"
+                                        Background="Transparent" BorderBrush="{StaticResource WarnTextBrush}"
+                                        Foreground="{StaticResource WarnTextBrush}" BorderThickness="1" Cursor="Hand"
+                                        Click="ResetBtn_Click"/>
+                                <Button Content="💾 保存提示词" Padding="16,6" FontSize="12" FontWeight="Bold"
+                                        Background="{StaticResource PrimaryBrush}" Foreground="White"
+                                        BorderThickness="0" Cursor="Hand"
+                                        Click="SavePromptsBtn_Click"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Border>
+            </TabItem>
+        </TabControl>
+
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,8,0,0">
+            <Button Content="关闭" Padding="16,6" FontSize="12"
+                    Background="Transparent" BorderBrush="{StaticResource BorderBrush}"
+                    BorderThickness="1" Cursor="Hand"
+                    Click="CloseBtn_Click"/>
+        </StackPanel>
+    </Grid>
+</Window>

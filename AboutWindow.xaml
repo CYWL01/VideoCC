@@ -1,0 +1,24 @@
+<Window x:Class="SubtitleMatcher.AboutWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="关于" Height="950" Width="620"
+        WindowStartupLocation="CenterOwner"
+        Background="{StaticResource BgBrush}"
+        FontFamily="{StaticResource UiFont}">
+    <Grid Margin="16">
+        <Border Background="{StaticResource CardBgBrush}" CornerRadius="8"
+                Effect="{StaticResource CardShadow}"
+                Padding="16">
+            <ScrollViewer VerticalScrollBarVisibility="Auto"
+                          CanContentScroll="False" PanningMode="VerticalOnly">
+                <RichTextBox x:Name="DocViewer"
+                             IsReadOnly="True"
+                             BorderThickness="0"
+                             Background="Transparent"
+                             IsDocumentEnabled="True"
+                             FontFamily="{StaticResource UiFont}"
+                             Padding="0"/>
+            </ScrollViewer>
+        </Border>
+    </Grid>
+</Window>
