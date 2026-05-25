@@ -242,6 +242,8 @@ public partial class FileNameCleaner
             if (Regex.IsMatch(part, @"^第.+季$")) continue;
             if (Regex.IsMatch(part, @"^\d+[-_]")) continue;
             if (Regex.IsMatch(part, @"^\d+$")) continue;
+            if (Regex.IsMatch(part, @"^[Ee]\d+", RegexOptions.IgnoreCase)) continue;
+            if (Regex.IsMatch(part, @"^[Ss]\d+[Ee]\d+$", RegexOptions.IgnoreCase)) continue;
 
             var cleaned = CleanTitle(part);
             var key = NormalizeKey(cleaned);

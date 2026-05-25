@@ -447,7 +447,7 @@
                               BorderThickness="0"
                               FontSize="12"
                               Foreground="{StaticResource TextBrush}"
-                              RowHeight="28"
+
                               AlternatingRowBackground="{StaticResource TableAltBrush}"
                               LoadingRow="MatchGrid_LoadingRow">
                         <DataGrid.Resources>
@@ -464,7 +464,7 @@
                             </Style>
                             <Style TargetType="DataGridCell">
                                 <Setter Property="BorderThickness" Value="0"/>
-                                <Setter Property="Padding" Value="10,2"/>
+                                <Setter Property="Padding" Value="8,4"/>
                                 <Setter Property="VerticalAlignment" Value="Center"/>
                                 <Setter Property="HorizontalContentAlignment" Value="Center"/>
                             </Style>

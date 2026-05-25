@@ -187,7 +187,7 @@ public class MatchingService
         // 双方都有文件名剧名 → 精确匹配
         if (video.HasFileSeries && sub.HasFileSeries)
         {
-            if (KeyMatch(video.FileSeriesKey, sub.FileSeriesKey)) return 120;
+            if (KeyMatch(video.FileSeriesKey, sub.FileSeriesKey) && !IsJustEpisodeKey(video.FileSeriesKey)) return 120;
 
             // 文件名不匹配时尝试目录关联匹配
             if (video.HasDirectorySeries && KeyContains(sub.FileSeriesKey, video.DirectorySeriesKeys))
@@ -238,6 +238,10 @@ public class MatchingService
         // 双方都无剧名
         return 15;
     }
+
+    /// <summary>判断 key 是否仅为集号（如 e01、01），无有意义的剧名信息</summary>
+    private static bool IsJustEpisodeKey(string key) =>
+        !string.IsNullOrEmpty(key) && System.Text.RegularExpressions.Regex.IsMatch(key, @"^[es]?\d+$", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
 
     private static bool KeyMatch(string key, HashSet<string> keys) =>
         keys.Contains(key, StringComparer.OrdinalIgnoreCase);

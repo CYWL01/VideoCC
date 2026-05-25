@@ -14,7 +14,7 @@
     <Color x:Key="ColorPrimaryHover">#5FB88E</Color>
     <Color x:Key="ColorPrimaryLight">#E8F5E9</Color>
     <Color x:Key="ColorHeaderBg">#EDF7F1</Color>
-    <Color x:Key="ColorTableAlt">#F8FBF9</Color>
+    <Color x:Key="ColorTableAlt">#EAF1ED</Color>
     <Color x:Key="ColorText">#3D4F4A</Color>
     <Color x:Key="ColorTextLight">#8A9E96</Color>
     <Color x:Key="ColorTextMuted">#B5C7BF</Color>
@@ -61,7 +61,7 @@
     <x:Array x:Key="ThemePalette1" Type="Color" x:Shared="False">
         <Color>#F0F7F3</Color> <Color>#FFFFFF</Color> <Color>#7BC8A4</Color>
         <Color>#5FB88E</Color> <Color>#E8F5E9</Color> <Color>#EDF7F1</Color>
-        <Color>#F8FBF9</Color> <Color>#3D4F4A</Color> <Color>#8A9E96</Color>
+        <Color>#EAF1ED</Color> <Color>#3D4F4A</Color> <Color>#8A9E96</Color>
         <Color>#B5C7BF</Color> <Color>#DCE8E0</Color> <Color>#E8F5E9</Color>
         <Color>#2E7D32</Color> <Color>#FFF8E1</Color> <Color>#E65100</Color>
     </x:Array>

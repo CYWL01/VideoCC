@@ -25,6 +25,7 @@ public partial class MainWindow : Window
 
     private List<MediaFileInfo> _allSubtitles = new();
     private bool _aiEnabled;
+    private readonly HashSet<MatchItem> _aiProcessed = new();
 
     // （拖拽功能已移除）
 
@@ -80,22 +81,21 @@ public partial class MainWindow : Window
     // ── 初始化 DataGrid 列 ─────────────────────────────────
     private void SetupDataGrid()
     {
-        // 通用截断+提示+居中样式
-        Style TrimStyle(string bind) => new(typeof(TextBlock))
+        // 通用自动换行+提示+居中样式
+        Style CellStyle() => new(typeof(TextBlock))
         {
             Setters = {
-                new Setter(TextBlock.TextTrimmingProperty, TextTrimming.CharacterEllipsis),
-                new Setter(TextBlock.ToolTipProperty, new Binding(bind)),
+                new Setter(TextBlock.TextWrappingProperty, TextWrapping.Wrap),
                 new Setter(TextBlock.TextAlignmentProperty, TextAlignment.Center)
             }
         };
 
-        // 集数列居中+间距样式
-        Style EpStyle() => new(typeof(TextBlock))
+        // 方式列居中样式
+        Style WayStyle() => new(typeof(TextBlock))
         {
             Setters = {
-                new Setter(TextBlock.TextAlignmentProperty, TextAlignment.Center),
-                new Setter(TextBlock.MarginProperty, new Thickness(6, 0, 6, 0))
+                new Setter(TextBlock.TextWrappingProperty, TextWrapping.Wrap),
+                new Setter(TextBlock.TextAlignmentProperty, TextAlignment.Center)
             }
         };
 
@@ -104,18 +104,18 @@ public partial class MainWindow : Window
             new DataGridTextColumn
             {
                 Header = "📹 视频文件", Binding = new Binding("VideoFile"),
-                Width = new DataGridLength(5, DataGridLengthUnitType.Star),
-                ElementStyle = TrimStyle("VideoFile")
+                Width = new DataGridLength(3, DataGridLengthUnitType.Star),
+                ElementStyle = CellStyle()
             },
-            new DataGridTextColumn { Header = "集数", Binding = new Binding("VideoEpisode"), Width = DataGridLength.Auto, ElementStyle = EpStyle() },
+            new DataGridTextColumn { Header = "集数", Binding = new Binding("VideoEpisode"), Width = DataGridLength.Auto, MinWidth = 40, ElementStyle = CellStyle() },
             new DataGridTextColumn
             {
                 Header = "📜 匹配字幕", Binding = new Binding("SubtitleDisplay"),
-                Width = new DataGridLength(5, DataGridLengthUnitType.Star),
-                ElementStyle = TrimStyle("SubtitleDisplay")
+                Width = new DataGridLength(3, DataGridLengthUnitType.Star),
+                ElementStyle = CellStyle()
             },
-            new DataGridTextColumn { Header = "集数", Binding = new Binding("SubtitleEpisode"), Width = DataGridLength.Auto, ElementStyle = EpStyle() },
-            new DataGridTextColumn { Header = "方式", Binding = new Binding("MatchMethod"), Width = new DataGridLength(1, DataGridLengthUnitType.Star), MinWidth = 60, ElementStyle = new Style(typeof(TextBlock)) { Setters = { new Setter(TextBlock.TextAlignmentProperty, TextAlignment.Center) } } },
+            new DataGridTextColumn { Header = "集数", Binding = new Binding("SubtitleEpisode"), Width = DataGridLength.Auto, MinWidth = 40, ElementStyle = CellStyle() },
+            new DataGridTextColumn { Header = "方式", Binding = new Binding("MatchMethod"), Width = new DataGridLength(1, DataGridLengthUnitType.Star), MinWidth = 60, ElementStyle = WayStyle() },
             new DataGridCheckBoxColumn { Header = "✓", Binding = new Binding("IsSelected") { Mode = BindingMode.TwoWay }, Width = 28 },
         ];
 
@@ -169,13 +169,18 @@ public partial class MainWindow : Window
             if (_aiEnabled)
                 await RunAiMatching();
 
-            // 为未匹配项标注原因
+            // 为未匹配项标注原因（AI 处理过的优先显示 AI 判断结果）
             var nonEpTags = new[] { "nced", "ncop", "pv", "pved", "menu", "cm", "special", "trailer", "preview", "sample",
                 "op", "ed", "opening", "ending", "nc", "creditless", "interview", "making", "behind", "teaser", "recap",
                 "extra", "bonus", "ova", "oad", "sp" };
             foreach (var item in _items)
             {
                 if (item.IsMatched) continue;
+                if (_aiProcessed.Contains(item) && string.IsNullOrEmpty(item.UnmatchedReason))
+                {
+                    item.UnmatchedReason = "AI 判断不匹配";
+                    continue;
+                }
                 var fname = Path.GetFileNameWithoutExtension(item.VideoPath).ToLowerInvariant();
                 if (nonEpTags.Any(t => fname.Contains(t)))
                     item.UnmatchedReason = "非剧集标记过滤";
@@ -183,7 +188,7 @@ public partial class MainWindow : Window
                     item.UnmatchedReason = "无法识别剧名和集号";
                 else if (!item.VideoEpisodeNumber.HasValue)
                     item.UnmatchedReason = "无集号（电影/单文件）";
-                else if (_items.Any(i => i != item && i.VideoEpisodeNumber == item.VideoEpisodeNumber
+                else if (item.VideoEpisodeNumber.HasValue && _items.Any(i => i != item && i.VideoEpisodeNumber == item.VideoEpisodeNumber
                     && !string.IsNullOrEmpty(i.VideoSeriesKey) && !string.Equals(i.VideoSeriesKey, item.VideoSeriesKey, StringComparison.OrdinalIgnoreCase)))
                     item.UnmatchedReason = "同集多剧歧义跳过";
                 else
@@ -227,6 +232,9 @@ public partial class MainWindow : Window
         var statusText = StatusPills.Children.OfType<TextBlock>().LastOrDefault();
         if (statusText != null) statusText.Text = "AI 匹配中...";
 
+        // 记录被 AI 处理过但未匹配的项
+        _aiProcessed.Clear();
+
         // ── 有集号 → 按集分组 → 每批一次 AI 调用 ──
         var subsByEp = _allSubtitles.Where(s => s.HasEpisode && !string.IsNullOrEmpty(s.SeriesKey))
             .GroupBy(s => s.Episode!.Value)
@@ -244,10 +252,21 @@ public partial class MainWindow : Window
             var ep = epGroup.Key;
             if (!subsByEp.TryGetValue(ep, out var epSubs)) continue;
 
+            foreach (var item in epGroup) _aiProcessed.Add(item);
+
             var vidList = epGroup.Select(i => (i.VideoSeriesKey, i.VideoFile)).ToList();
             var subList = epSubs.Select(s => (s.SeriesKey, s.DisplayName)).ToList();
 
-            var matches = await _aiMatcher.BatchCompareNamesAsync(vidList, subList);
+            var unmatchedReasons = new Dictionary<int, string>();
+            var matches = await _aiMatcher.BatchCompareNamesAsync(vidList, subList, unmatchedReasons: unmatchedReasons);
+
+            // 应用 AI 返回的未匹配原因
+            foreach (var (vi, reason) in unmatchedReasons)
+            {
+                if (vi < 0 || vi >= epGroup.Count()) continue;
+                var item = epGroup.ElementAt(vi);
+                if (!item.IsMatched) item.UnmatchedReason = $"AI: {reason}";
+            }
 
             foreach (var m in matches)
             {
@@ -285,10 +304,21 @@ public partial class MainWindow : Window
             var subsNoEp = _allSubtitles.Where(s => !s.HasEpisode && !string.IsNullOrEmpty(s.SeriesKey)).ToList();
             if (subsNoEp.Count > 0)
             {
+                foreach (var item in pendingNoEp) _aiProcessed.Add(item);
+
                 var vidList = pendingNoEp.Select(i => (i.VideoSeriesKey, i.VideoFile)).ToList();
                 var subList = subsNoEp.Select(s => (s.SeriesKey, s.DisplayName)).ToList();
 
-                var matches = await _aiMatcher.BatchCompareNamesAsync(vidList, subList);
+                var unmatchedReasons2 = new Dictionary<int, string>();
+                var matches = await _aiMatcher.BatchCompareNamesAsync(vidList, subList, unmatchedReasons: unmatchedReasons2);
+
+                // 应用 AI 返回的未匹配原因
+                foreach (var (vi, reason) in unmatchedReasons2)
+                {
+                    if (vi < 0 || vi >= pendingNoEp.Count) continue;
+                    var item = pendingNoEp[vi];
+                    if (!item.IsMatched) item.UnmatchedReason = $"AI: {reason}";
+                }
 
                 foreach (var m in matches)
                 {
@@ -316,6 +346,53 @@ public partial class MainWindow : Window
             batchDone++;
             ProgressBar.Value = (double)batchDone / totalBatches * ProgressBar.Maximum;
         }
+
+        // ── 兜底：所有 AI 未匹配项逐一比对（并行，最多3路）──
+        var fallbackItems = _items.Where(i => !i.IsMatched && !string.IsNullOrEmpty(i.VideoSeriesKey)).ToList();
+        if (fallbackItems.Count > 0 && statusText != null) statusText.Text = "AI 逐一比对...";
+
+        var parallelOpts = new ParallelOptions { MaxDegreeOfParallelism = 3 };
+        await Parallel.ForEachAsync(fallbackItems, parallelOpts, async (item, ct) =>
+        {
+            // 搜索所有未匹配成功的字幕（包括有集号的），靠 AI 推断是否同一作品
+            var usedSubPaths = new HashSet<string>(_items.Where(i => i.IsMatched && !string.IsNullOrEmpty(i.SubtitlePath)).Select(i => i.SubtitlePath), StringComparer.OrdinalIgnoreCase);
+            var candidates = _allSubtitles.Where(s => !usedSubPaths.Contains(s.FilePath));
+            if (item.VideoEpisodeNumber.HasValue)
+                candidates = candidates.Where(s => s.HasEpisode && s.Episode == item.VideoEpisodeNumber);
+            var candidateList = candidates.Where(s => !string.IsNullOrEmpty(s.SeriesKey)).ToList();
+            if (candidateList.Count == 0) return;
+
+            AiMatchResult? lastResult = null;
+            foreach (var sub in candidateList)
+            {
+                if (ct.IsCancellationRequested) return;
+                // 用路径（含目录）去除集号后缀后比对
+                var videoName = AiMatchingService.StripEpisodeSuffix(System.Text.RegularExpressions.Regex.Replace(item.VideoFile ?? "", @"\.[^.]+$", ""));
+                var subName = AiMatchingService.StripEpisodeSuffix(System.Text.RegularExpressions.Regex.Replace(sub.DisplayName ?? sub.SeriesKey ?? "", @"\.[^.]+$", ""));
+                var result = await _aiMatcher.CompareNamesAsync(videoName, subName, ct);
+                lastResult = result;
+                if (result.IsMatch && result.Confidence >= 0.5)
+                {
+                    Dispatcher.Invoke(() =>
+                    {
+                        item.SubtitleFile = sub.DisplayName;
+                        item.SubtitlePath = sub.FilePath;
+                        item.SubtitleEpisode = sub.EpisodeLabel;
+                        item.MatchMethod = "AI 智能匹配";
+                    });
+                    break;
+                }
+            }
+            // 全都没匹配上时，保留 AI 返回的理由，不被后面的通用逻辑覆盖
+            if (!item.IsMatched && lastResult != null)
+            {
+                var reason = lastResult.Reason;
+                if (!string.IsNullOrEmpty(reason) && reason.Length > 2)
+                {
+                    Dispatcher.Invoke(() => item.UnmatchedReason = $"AI: {reason}");
+                }
+            }
+        });
 
         ProgressBar.Visibility = Visibility.Collapsed;
     }
